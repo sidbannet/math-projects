@@ -68,7 +68,7 @@ class Marching:
 
 
 def _terms_(
-        n: int,
+    n: int,
 ) -> float:
     """Terms in the logistic map function."""
 
