@@ -7,6 +7,7 @@ Classes for logistic map
 
 import sympy
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 class Marching:
@@ -56,6 +57,46 @@ class Marching:
                     number_of_terms=1,
                 )
             )
+
+    def plots(
+        self,
+        fig_info: tuple = None,
+        fig_prop: dict = None,
+    ) -> tuple:
+        """Plot the progression of values against iterations."""
+        if fig_info is not None:
+            fig, ax = fig_info
+        else:
+            fig = plt.figure('Value marching')
+            ax = fig.subplots()
+        if fig_prop is None:
+            fig_prop = {
+                'color': 'k',
+                'linewidth': 2,
+                'linestyle': '-',
+                'marker': '.',
+                'fillstyle': 'full',
+                'xlabel': 'Iterations',
+                'ylabel': 'Value',
+                'title': 'Progression of the logistic map equation',
+                'grid': True,
+            }
+
+        ax.plot(
+            self.x_values,
+            color=fig_prop['color'],
+            linewidth=fig_prop['linewidth'],
+            linestyle=fig_prop['linestyle'],
+            marker=fig_prop['marker'],
+            fillstyle=fig_prop['fillstyle'],
+        )
+        ax.set(xlabel=fig_prop['xlabel'])
+        ax.set(ylabel=fig_prop['ylabel'])
+        ax.set(title=fig_prop['title'])
+        ax.grid(fig_prop['grid'])
+
+        return fig, ax, fig_prop
+
 
     @staticmethod
     def next_value(
