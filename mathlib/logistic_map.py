@@ -16,9 +16,9 @@ class Marching:
     _DEFAULT_INITIAL_VALUE = float(0.5)
 
     def __init__(
-            self,
-            growth_rate: float = _DEFAULT_GROWTH_RATE,
-            initial_value: float = _DEFAULT_INITIAL_VALUE,
+        self,
+        growth_rate: float = _DEFAULT_GROWTH_RATE,
+        initial_value: float = _DEFAULT_INITIAL_VALUE,
     ):
         """Initialize the class."""
         assert (initial_value > 0), "Initial value is equal or less than 0."
@@ -28,9 +28,9 @@ class Marching:
         self.x_values = [initial_value]
 
     def _next_value_(
-            self,
-            last_value: float,
-            number_of_terms: int = 1,
+        self,
+        last_value: float,
+        number_of_terms: int = 1,
     ) -> float:
         """Solve for the next iteration."""
         assert (number_of_terms >= 0), "Number of terms can't be negetive."
@@ -40,15 +40,6 @@ class Marching:
             term_func.append(_terms_(n=i))
             sum_of_terms += term_func[i](last_value)
         return float(self.growth_rate * sum_of_terms)
-
-    @staticmethod
-    def next_value(
-        last_value: float = 0.5,
-        growth_rate: float = 1.0,
-        function=np.sin,
-    ) -> float:
-        """Return value based on passed function."""
-        return growth_rate * function(last_value)
 
     def solve(
         self,
@@ -65,6 +56,15 @@ class Marching:
                     number_of_terms=1,
                 )
             )
+
+    @staticmethod
+    def next_value(
+            last_value: float = 0.5,
+            growth_rate: float = 1.0,
+            function=np.sin,
+    ) -> float:
+        """Return value based on passed function."""
+        return growth_rate * function(last_value)
 
 
 def _terms_(
