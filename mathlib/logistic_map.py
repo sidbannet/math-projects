@@ -27,6 +27,10 @@ class Marching:
         assert (growth_rate > 0), "Growth rate is less than or equal to 0."
         self.growth_rate = growth_rate
         self.x_values = [initial_value]
+        self.fft = {
+            'power': [],
+            'freq': [],
+        }
 
     def _next_value_(
         self,
@@ -57,6 +61,10 @@ class Marching:
                     number_of_terms=1,
                 )
             )
+        self.fft['power'] = np.abs(np.fft.fft(self.x_values, axis=0))
+        self.fft['freq'] = list(
+            np.array(range(len(self.x_values))) / len(self.x_values)
+        )
 
     def plots(
         self,
