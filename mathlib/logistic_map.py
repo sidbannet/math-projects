@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 
 class Marching:
-    """Marching with iterations."""
+    """Marching with generations."""
 
     _DEFAULT_GROWTH_RATE = float(3.4)
     _DEFAULT_INITIAL_VALUE = float(0.5)
@@ -37,7 +37,7 @@ class Marching:
         last_value: float,
         number_of_terms: int = 1,
     ) -> float:
-        """Solve for the next iteration."""
+        """Solve for the next generation."""
         assert (number_of_terms >= 0), "Number of terms can't be negetive."
         sum_of_terms = 0.0
         term_func = []
@@ -48,13 +48,13 @@ class Marching:
 
     def solve(
         self,
-        number_of_iterations: int = 100,
+        number_of_generations: int = 100,
     ):
-        """Solve for iterations and march for values in logistic map.
-        :param number_of_iterations: number of iterations done in solve
+        """Solve for generations and march for values in logistic map.
+        :param number_of_generations: number of generations done in solve
         """
-        assert (number_of_iterations > 1), "Number of iteration is too low."
-        for i in range(number_of_iterations):
+        assert (number_of_generations > 1), "Number of generation is too low."
+        for i in range(number_of_generations):
             self.x_values.append(
                 self._next_value_(
                     last_value=self.x_values[-1],
@@ -71,7 +71,7 @@ class Marching:
         fig_info: tuple = None,
         fig_prop: dict = None,
     ) -> tuple:
-        """Plot the progression of values against iterations."""
+        """Plot the progression of values against generations."""
         if fig_info is not None:
             fig, ax = fig_info
         else:
@@ -84,7 +84,7 @@ class Marching:
                 'linestyle': '-',
                 'marker': '.',
                 'fillstyle': 'full',
-                'xlabel': 'Iterations',
+                'xlabel': 'Generations',
                 'ylabel': 'Value',
                 'title': 'Progression of the logistic map equation',
                 'grid': True,
