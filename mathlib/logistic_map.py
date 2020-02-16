@@ -76,7 +76,7 @@ class Marching:
             fig, ax = fig_info
         else:
             fig = plt.figure('Value marching')
-            ax = fig.subplots()
+            ax = fig.subplots(2, 1)
         if fig_prop is None:
             fig_prop = {
                 'color': 'k',
@@ -86,11 +86,15 @@ class Marching:
                 'fillstyle': 'full',
                 'xlabel': 'Generations',
                 'ylabel': 'Value',
+                'freqlabel': 'Time Period',
+                'amplitudelabel': 'Log of Power',
                 'title': 'Progression of the logistic map equation',
+                'freqtitle': 'Power frequency spectrum',
                 'grid': True,
+                'suptitle': 'Logistic Map',
             }
 
-        ax.plot(
+        ax[0].plot(
             self.x_values,
             color=fig_prop['color'],
             linewidth=fig_prop['linewidth'],
@@ -98,10 +102,26 @@ class Marching:
             marker=fig_prop['marker'],
             fillstyle=fig_prop['fillstyle'],
         )
-        ax.set(xlabel=fig_prop['xlabel'])
-        ax.set(ylabel=fig_prop['ylabel'])
-        ax.set(title=fig_prop['title'])
-        ax.grid(fig_prop['grid'])
+        ax[0].set(xlabel=fig_prop['xlabel'])
+        ax[0].set(ylabel=fig_prop['ylabel'])
+        ax[0].set(title=fig_prop['title'])
+        ax[0].grid(fig_prop['grid'])
+
+        ax[1].plot(
+            self.fft['freq'][1:],
+            np.log(self.fft['power'][1:]),
+            color=fig_prop['color'],
+            linewidth=fig_prop['linewidth'],
+            linestyle=fig_prop['linestyle'],
+            marker='None',
+        )
+        ax[1].set(xlabel=fig_prop['freqlabel'])
+        ax[1].set(ylabel=fig_prop['amplitudelabel'])
+        ax[1].set(title=fig_prop['freqtitle'])
+        ax[1].grid(fig_prop['grid'])
+        ax[1].set(xlim=[0, 1])
+
+        fig.suptitle(fig_prop['suptitle'])
 
         return fig, ax, fig_prop
 
