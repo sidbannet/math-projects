@@ -27,6 +27,8 @@ class Marching:
         assert (growth_rate > 0), "Growth rate is less than or equal to 0."
         self.growth_rate = growth_rate
         self.x_values = [initial_value]
+        self.number_of_terms = 1
+        self.func = None
         self.fft = {
             'power': [],
             'freq': [],
@@ -35,30 +37,83 @@ class Marching:
     def _next_value_(
         self,
         last_value: float,
-        number_of_terms: int = 1,
+        number_of_terms: int,
+        function: tuple = None,
     ) -> float:
-        """Solve for the next generation."""
+        """Solve for the next generation, using default function."""
+        number_of_terms = self.number_of_terms
         assert (number_of_terms >= 0), "Number of terms can't be negetive."
         sum_of_terms = 0.0
-        term_func = []
-        for i in range(number_of_terms + 1):
-            term_func.append(_terms_(n=i))
-            sum_of_terms += term_func[i](last_value)
+        if function is not None:
+            term_func = function
+        else:
+            term_func = []
+            for i in number_of_terms:
+                term_func.append(_terms_(n=i))
+        for iterms, ifunc in enumerate(term_func):
+            sum_of_terms += ifunc(last_value)
         return float(self.growth_rate * sum_of_terms)
+
+    def plot_function(
+        self,
+        fig_info: tuple = None,
+    ) -> tuple:
+        """Show the logistic map equation in plots."""
+        if fig_info is not None:
+            fig, ax = fig_info
+        else:
+            fig = plt.figure('Fig: Function used')
+            ax = fig.subplots()
+        x = np.linspace(start=0.0, stop=1.0, num=100)
+        y = []
+        if self.func is not None:
+            func = self.func
+        else:
+            func = _terms_(n=1)
+        for ix, xterm in enumerate(x):
+            yterm = 0.0
+            try:
+                for iterms, ifunc in enumerate(func):
+                    yterm += self.next_value(
+                        last_value=xterm,
+                        growth_rate=self.growth_rate,
+                        function=ifunc,
+                    )
+            except TypeError:
+                yterm += self.growth_rate * func(xterm)
+            y.append(yterm)
+        y = np.asarray(y)
+        ax.plot(x, y, linewidth=3, linestyle='-', color='k', label='Function')
+        ax.plot(x, x, linewidth=1, linestyle='--', color='k', label='Equality')
+        ax.grid(True)
+        ax.set(xlim=[0, 1])
+        ax.set(ylim=[0, 1])
+        ax.set(xlabel='Value of $x_{i}$')
+        ax.set(ylabel='Value of $x_{i+1}$')
+        ax.legend()
+        ax.set(title='Function of the logistic map equation')
+        return fig, ax
+
 
     def solve(
         self,
         number_of_generations: int = 100,
+        number_of_terms: int = 1,
     ):
         """Solve for generations and march for values in logistic map.
+        :param number_of_terms: number of terms in the series
         :param number_of_generations: number of generations done in solve
         """
         assert (number_of_generations > 1), "Number of generation is too low."
+        self.func = []
+        for i in range(number_of_terms + 1):
+            self.func.append(_terms_(n=i))
         for i in range(number_of_generations):
             self.x_values.append(
                 self._next_value_(
                     last_value=self.x_values[-1],
-                    number_of_terms=1,
+                    number_of_terms=number_of_terms,
+                    function=self.func,
                 )
             )
         self.fft['power'] = np.abs(np.fft.fft(self.x_values, axis=0))
@@ -75,8 +130,8 @@ class Marching:
         if fig_info is not None:
             fig, ax = fig_info
         else:
-            fig = plt.figure('Value marching')
-            ax = fig.subplots(2, 1)
+            fig = plt.figure('Fig: Value marching with generations')
+            ax = fig.subplots(1, 2)
         if fig_prop is None:
             fig_prop = {
                 'color': 'k',
