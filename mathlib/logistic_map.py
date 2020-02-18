@@ -22,6 +22,7 @@ class Marching:
             initial_value: float = _DEFAULT_INITIAL_VALUE,
     ):
         """Initialize the class."""
+
         assert (initial_value > 0), "Initial value is equal or less than 0."
         assert (initial_value < 1), "Initial value is equal or greater than 1."
         assert (growth_rate > 0), "Growth rate is less than or equal to 0."
@@ -42,8 +43,9 @@ class Marching:
             function: list = None,
     ) -> float:
         """Solve for the next generation, using default function."""
+
         number_of_terms = self.number_of_terms
-        assert (number_of_terms >= 0), "Number of terms can't be negetive."
+        assert (number_of_terms >= 0), "Number of terms can't be negative."
         sum_of_terms = 0.0
         if function is not None:
             term_func = function
@@ -51,8 +53,8 @@ class Marching:
             term_func = []
             for i in range(number_of_terms + 1):
                 term_func.append(_terms_(n=i))
-        for iterms, ifunc in enumerate(term_func):
-            sum_of_terms += ifunc(last_value)
+        for index, individual_term_function in enumerate(term_func):
+            sum_of_terms += individual_term_function(last_value)
         return float(self.growth_rate * sum_of_terms)
 
     def plot_function(
@@ -64,6 +66,7 @@ class Marching:
         Returns tuple with fig, ax
 
         """
+
         if fig_info is not None:
             fig, ax = fig_info
         else:
@@ -104,10 +107,14 @@ class Marching:
             number_of_generations: int = 100,
             number_of_terms: int = 1,
     ):
-        """Solve for generations and march for values in logistic map.
+        """
+        Solve for generations and march for values in logistic map.
+
         :param number_of_terms: number of terms in the series
         :param number_of_generations: number of generations done in solve
+
         """
+
         assert (number_of_generations > 1), "Number of generation is too low."
         self.func = []
         for i in range(number_of_terms + 1):
@@ -130,7 +137,12 @@ class Marching:
             fig_info: tuple = None,
             fig_prop: dict = None,
     ) -> tuple:
-        """Plot the progression of values against generations."""
+        """
+        Plot the progression of values against generations.
+        Returns tuple with fig, ax
+
+        """
+
         if fig_info is not None:
             fig, ax = fig_info
         else:
@@ -191,6 +203,7 @@ class Marching:
             function=np.sin,
     ) -> float:
         """Return value based on passed function."""
+
         return growth_rate * function(last_value)
 
 
@@ -205,6 +218,7 @@ class Map(Marching):
             number_of_terms_for_default_parabola: int = 1,
     ):
         """Instantiate the subclass with given function."""
+
         super().__init__(
             initial_value=initial_value,
             growth_rate=growth_rate,
@@ -221,23 +235,44 @@ class Bifurcation:
         function_to_map: list = None,
     ):
         """Instantiate the class."""
-        self.y_equilibrium = []
-        self.r_equilibrium = []
+
+        self.y_equilibrium = np.empty([])
+        self.r_equilibrium = np.empty([])
         self.function_to_map = function_to_map
 
     def __call__(self, *args, **kwargs):
         """The object is called like function."""
-        self._get_equilibrium_values()
 
-    def _get_equilibrium_values(self) -> None:
+        number_of_generations_for_equilibrium = 0
+        if args is not None:
+            for argv in args:
+                number_of_generations_for_equilibrium += int(argv)
+        else:
+            number_of_generations_for_equilibrium = 150
+        self._get_equilibrium_values(
+            number_of_generations=number_of_generations_for_equilibrium
+        )
+
+    def _get_equilibrium_values(
+        self,
+        number_of_generations: int = 300,
+    ) -> None:
         """Get the values of equilibrium"""
+
+        if number_of_generations <= 90:
+            raise ValueError('Number of generations \
+             to equilibrium is too low.')
+
+        n_generations = number_of_generations
+        n_equilibrium = 64
+
         demo_map_obj = Map(
             growth_rate=1.0,
             function_for_mapping=self.function_to_map,
         )
         _, _ = demo_map_obj.plot_function()
         growth_rate = np.linspace(
-            start=0.01, stop=float(1.0 / demo_map_obj.y.max()), num=1000
+            start=0.1, stop=float(1.0 / demo_map_obj.y.max()), num=1000
         )
         for index, irate in enumerate(growth_rate):
             map_obj = Map(
@@ -245,10 +280,16 @@ class Bifurcation:
                 initial_value=0.1,
                 growth_rate=irate,
             )
-            map_obj.solve(number_of_generations=300)
-            self.y_equilibrium.append(map_obj.x_values[-100:-1])
-            self.r_equilibrium.append(
-                np.full_like(self.y_equilibrium, irate, dtype=np.double)
+            map_obj.solve(number_of_generations=n_generations)
+            y_values = np.unique(
+                np.around(map_obj.x_values[-n_equilibrium:-1], decimals=3)
+            )
+            self.y_equilibrium = np.append(
+                self.y_equilibrium, y_values
+            )
+            self.r_equilibrium = np.append(
+                self.r_equilibrium,
+                np.full_like(y_values, irate, dtype=np.double)
             )
 
 
