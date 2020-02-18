@@ -9,12 +9,12 @@ import sympy
 import numpy as np
 import matplotlib.pyplot as plt
 
+_DEFAULT_GROWTH_RATE = float(3.4)
+_DEFAULT_INITIAL_VALUE = float(0.5)
+
 
 class Marching:
     """Marching with generations."""
-
-    _DEFAULT_GROWTH_RATE = float(3.4)
-    _DEFAULT_INITIAL_VALUE = float(0.5)
 
     def __init__(
         self,
@@ -35,10 +35,10 @@ class Marching:
         }
 
     def _next_value_(
-        self,
-        last_value: float,
-        number_of_terms: int,
-        function: tuple = None,
+            self,
+            last_value: float,
+            number_of_terms: int,
+            function: list = None,
     ) -> float:
         """Solve for the next generation, using default function."""
         number_of_terms = self.number_of_terms
@@ -48,15 +48,15 @@ class Marching:
             term_func = function
         else:
             term_func = []
-            for i in number_of_terms:
+            for i in range(number_of_terms + 1):
                 term_func.append(_terms_(n=i))
         for iterms, ifunc in enumerate(term_func):
             sum_of_terms += ifunc(last_value)
         return float(self.growth_rate * sum_of_terms)
 
     def plot_function(
-        self,
-        fig_info: tuple = None,
+            self,
+            fig_info: tuple = None,
     ) -> tuple:
         """Show the logistic map equation in plots."""
         if fig_info is not None:
@@ -94,11 +94,10 @@ class Marching:
         ax.set(title='Function of the logistic map equation')
         return fig, ax
 
-
     def solve(
-        self,
-        number_of_generations: int = 100,
-        number_of_terms: int = 1,
+            self,
+            number_of_generations: int = 100,
+            number_of_terms: int = 1,
     ):
         """Solve for generations and march for values in logistic map.
         :param number_of_terms: number of terms in the series
@@ -122,9 +121,9 @@ class Marching:
         )
 
     def plots(
-        self,
-        fig_info: tuple = None,
-        fig_prop: dict = None,
+            self,
+            fig_info: tuple = None,
+            fig_prop: dict = None,
     ) -> tuple:
         """Plot the progression of values against generations."""
         if fig_info is not None:
@@ -180,7 +179,6 @@ class Marching:
 
         return fig, ax, fig_prop
 
-
     @staticmethod
     def next_value(
             last_value: float = 0.5,
@@ -191,11 +189,29 @@ class Marching:
         return growth_rate * function(last_value)
 
 
+class Map(Marching):
+    """Marching with generations with a given mapping function."""
+    def __init__(
+        self,
+        initial_value : float = _DEFAULT_INITIAL_VALUE,
+        growth_rate : float = _DEFAULT_GROWTH_RATE,
+        function_for_mapping : list = None,
+        number_of_terms_for_default_parabola : int = 1,
+    ):
+        """Instantiate the subclass with given function."""
+        super().__init__(
+            initial_value=initial_value,
+            growth_rate=growth_rate,
+        )
+        self.func = function_for_mapping
+        self.number_of_terms = number_of_terms_for_default_parabola
+
+
 def _terms_(
-    n: int,
-) -> float:
+        n: int,
+):
     """Terms in the logistic map function."""
 
     return lambda x: (
-        (x ** n) * (1 - (x ** n))
-    ) / sympy.factorial(n)
+                             (x ** n) * (1 - (x ** n))
+                     ) / sympy.factorial(n)
