@@ -17,9 +17,9 @@ class Marching:
     """Marching with generations."""
 
     def __init__(
-        self,
-        growth_rate: float = _DEFAULT_GROWTH_RATE,
-        initial_value: float = _DEFAULT_INITIAL_VALUE,
+            self,
+            growth_rate: float = _DEFAULT_GROWTH_RATE,
+            initial_value: float = _DEFAULT_INITIAL_VALUE,
     ):
         """Initialize the class."""
         assert (initial_value > 0), "Initial value is equal or less than 0."
@@ -28,6 +28,7 @@ class Marching:
         self.growth_rate = growth_rate
         self.x_values = [initial_value]
         self.number_of_terms = 1
+        self.y = None
         self.func = None
         self.fft = {
             'power': [],
@@ -58,7 +59,11 @@ class Marching:
             self,
             fig_info: tuple = None,
     ) -> tuple:
-        """Show the logistic map equation in plots."""
+        """
+        Show the logistic map equation in plots.
+        Returns tuple with fig, ax
+
+        """
         if fig_info is not None:
             fig, ax = fig_info
         else:
@@ -82,7 +87,7 @@ class Marching:
             except TypeError:
                 yterm += self.growth_rate * func(xterm)
             y.append(yterm)
-        y = np.asarray(y)
+        self.y = np.asarray(y)
         ax.plot(x, y, linewidth=3, linestyle='-', color='k', label='Function')
         ax.plot(x, x, linewidth=1, linestyle='--', color='k', label='Equality')
         ax.grid(True)
@@ -191,12 +196,13 @@ class Marching:
 
 class Map(Marching):
     """Marching with generations with a given mapping function."""
+
     def __init__(
-        self,
-        initial_value : float = _DEFAULT_INITIAL_VALUE,
-        growth_rate : float = _DEFAULT_GROWTH_RATE,
-        function_for_mapping : list = None,
-        number_of_terms_for_default_parabola : int = 1,
+            self,
+            initial_value: float = _DEFAULT_INITIAL_VALUE,
+            growth_rate: float = _DEFAULT_GROWTH_RATE,
+            function_for_mapping: list = None,
+            number_of_terms_for_default_parabola: int = 1,
     ):
         """Instantiate the subclass with given function."""
         super().__init__(
@@ -205,6 +211,45 @@ class Map(Marching):
         )
         self.func = function_for_mapping
         self.number_of_terms = number_of_terms_for_default_parabola
+
+
+class Bifurcation:
+    """Class to generate bifurcation."""
+
+    def __init__(
+        self,
+        function_to_map: list = None,
+    ):
+        """Instantiate the class."""
+        self.y_equilibrium = []
+        self.r_equilibrium = []
+        self.function_to_map = function_to_map
+
+    def __call__(self, *args, **kwargs):
+        """The object is called like function."""
+        self._get_equilibrium_values()
+
+    def _get_equilibrium_values(self) -> None:
+        """Get the values of equilibrium"""
+        demo_map_obj = Map(
+            growth_rate=1.0,
+            function_for_mapping=self.function_to_map,
+        )
+        _, _ = demo_map_obj.plot_function()
+        growth_rate = np.linspace(
+            start=0.01, stop=float(1.0 / demo_map_obj.y.max()), num=1000
+        )
+        for index, irate in enumerate(growth_rate):
+            map_obj = Map(
+                function_for_mapping=self.function_to_map,
+                initial_value=0.1,
+                growth_rate=irate,
+            )
+            map_obj.solve(number_of_generations=300)
+            self.y_equilibrium.append(map_obj.x_values[-100:-1])
+            self.r_equilibrium.append(
+                np.full_like(self.y_equilibrium, irate, dtype=np.double)
+            )
 
 
 def _terms_(
