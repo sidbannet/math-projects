@@ -373,10 +373,10 @@ class Bifurcation:
 
 
 def _terms_(
-        n: int,
+    n: int,
 ):
     """Terms in the logistic map function."""
 
     return lambda x: (
-                             (x ** n) * (1 - (x ** n))
-                     ) / sympy.factorial(n)
+        (x ** n) * (1 - (x ** n))
+    ) / sympy.factorial(n)
