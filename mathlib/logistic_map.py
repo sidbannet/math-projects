@@ -134,9 +134,10 @@ class Marching:
         if number_of_terms is not None:
             self.number_of_terms = number_of_terms
         assert (number_of_generations > 1), "Number of generation is too low."
-        self.func = []
-        for i in range(self.number_of_terms + 1):
-            self.func.append(_terms_(n=i))
+        if self.func is None:
+            self.func = []
+            for i in range(self.number_of_terms + 1):
+                self.func.append(_terms_(n=i))
         for i in range(number_of_generations):
             self.x_values.append(
                 self._next_value_(
