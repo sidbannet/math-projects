@@ -39,7 +39,6 @@ class Marching:
     def _next_value_(
             self,
             last_value: float,
-            number_of_terms: int,
             function: list = None,
     ) -> float:
         """Solve for the next generation, using default function."""
@@ -59,7 +58,7 @@ class Marching:
 
     def plot_function(
             self,
-            fig_info: tuple = None,
+            *fig_info,
     ) -> tuple:
         """
         Show the logistic map equation in plots.
@@ -67,9 +66,9 @@ class Marching:
 
         """
 
-        if fig_info is not None:
+        try:
             fig, ax = fig_info
-        else:
+        except ValueError:
             fig = plt.figure('Fig: Function used')
             ax = fig.subplots()
         x = np.linspace(start=0.0, stop=1.0, num=100)
@@ -105,8 +104,8 @@ class Marching:
     def solve(
             self,
             number_of_generations: int = 100,
-            number_of_terms: int = 1,
-    ):
+            number_of_terms: int = None,
+    ) -> None:
         """
         Solve for generations and march for values in logistic map.
 
@@ -115,15 +114,16 @@ class Marching:
 
         """
 
+        if number_of_terms is not None:
+            self.number_of_terms = number_of_terms
         assert (number_of_generations > 1), "Number of generation is too low."
         self.func = []
-        for i in range(number_of_terms + 1):
+        for i in range(self.number_of_terms + 1):
             self.func.append(_terms_(n=i))
         for i in range(number_of_generations):
             self.x_values.append(
                 self._next_value_(
                     last_value=self.x_values[-1],
-                    number_of_terms=number_of_terms,
                     function=self.func,
                 )
             )
@@ -134,8 +134,8 @@ class Marching:
 
     def plots(
             self,
-            fig_info: tuple = None,
-            fig_prop: dict = None,
+            *fig_info,
+            **fig_prop,
     ) -> tuple:
         """
         Plot the progression of values against generations.
@@ -143,27 +143,37 @@ class Marching:
 
         """
 
-        if fig_info is not None:
+        try:
             fig, ax = fig_info
-        else:
+        except ValueError:
             fig = plt.figure('Fig: Value marching with generations')
             ax = fig.subplots(1, 2)
-        if fig_prop is None:
-            fig_prop = {
-                'color': 'k',
-                'linewidth': 2,
-                'linestyle': '-',
-                'marker': '.',
-                'fillstyle': 'full',
-                'xlabel': 'Generations',
-                'ylabel': 'Value',
-                'freqlabel': 'Time Period',
-                'amplitudelabel': 'Log of Power',
-                'title': 'Progression of the logistic map equation',
-                'freqtitle': 'Power frequency spectrum',
-                'grid': True,
-                'suptitle': 'Logistic Map',
-            }
+        if 'color' not in fig_prop.keys():
+            fig_prop['color'] = 'k'
+        if 'linewidth' not in fig_prop.keys():
+            fig_prop['linewidth'] = 2
+        if 'linestyle' not in fig_prop.keys():
+            fig_prop['linestyle'] = '-'
+        if 'marker' not in fig_prop.keys():
+            fig_prop['marker'] = '.'
+        if 'fillstyle' not in fig_prop.keys():
+            fig_prop['fillstyle'] = 'full'
+        if 'xlabel' not in fig_prop.keys():
+            fig_prop['xlabel'] = 'Generations'
+        if 'ylabel' not in fig_prop.keys():
+            fig_prop['ylabel'] = 'Value'
+        if 'freqlabel' not in fig_prop.keys():
+            fig_prop['freqlabel'] = 'Time Period'
+        if 'amplitudelabel' not in fig_prop.keys():
+            fig_prop['amplitudelabel'] = 'Log of Power'
+        if 'title' not in fig_prop.keys():
+            fig_prop['title'] = 'Progression of logistic map equation'
+        if 'freqtitle' not in fig_prop.keys():
+            fig_prop['freqtitle'] = 'Power frequency spectrum'
+        if 'suptitle' not in fig_prop.keys():
+            fig_prop['suptitle'] = 'Logistic Map'
+        if 'grid' not in fig_prop.keys():
+            fig_prop['grid'] = True
 
         ax[0].plot(
             self.x_values,
@@ -211,34 +221,32 @@ class Map(Marching):
     """Marching with generations with a given mapping function."""
 
     def __init__(
-            self,
-            initial_value: float = _DEFAULT_INITIAL_VALUE,
-            growth_rate: float = _DEFAULT_GROWTH_RATE,
-            function_for_mapping: list = None,
-            number_of_terms_for_default_parabola: int = 1,
+        self,
+        initial_value: float = _DEFAULT_INITIAL_VALUE,
+        growth_rate: float = _DEFAULT_GROWTH_RATE,
     ):
-        """Instantiate the subclass with given function."""
+        """Instantiate the class."""
 
         super().__init__(
             initial_value=initial_value,
             growth_rate=growth_rate,
         )
-        self.func = function_for_mapping
-        self.number_of_terms = number_of_terms_for_default_parabola
 
 
 class Bifurcation:
     """Class to generate bifurcation."""
 
     def __init__(
-        self,
-        function_to_map: list = None,
+            self,
+            function_to_map: list = None,
+            number_of_terms: int = 1,
     ):
         """Instantiate the class."""
 
         self.y_equilibrium = np.empty([])
         self.r_equilibrium = np.empty([])
         self.function_to_map = function_to_map
+        self.num_of_terms = number_of_terms
 
     def __call__(self, *args, **kwargs):
         """The object is called like function."""
@@ -249,13 +257,13 @@ class Bifurcation:
                 number_of_generations_for_equilibrium += int(argv)
         else:
             number_of_generations_for_equilibrium = 150
-        self._get_equilibrium_values(
+        self.get_equilibrium_values(
             number_of_generations=number_of_generations_for_equilibrium
         )
 
-    def _get_equilibrium_values(
-        self,
-        number_of_generations: int = 300,
+    def get_equilibrium_values(
+            self,
+            number_of_generations: int = 300,
     ) -> None:
         """Get the values of equilibrium"""
 
@@ -268,18 +276,20 @@ class Bifurcation:
 
         demo_map_obj = Map(
             growth_rate=1.0,
-            function_for_mapping=self.function_to_map,
         )
-        _, _ = demo_map_obj.plot_function()
+        demo_map_obj.func = self.function_to_map
+        _, ax = demo_map_obj.plot_function()
+        ax.set(title='Base function of the logistic map equation')
         growth_rate = np.linspace(
             start=0.1, stop=float(1.0 / demo_map_obj.y.max()), num=1000
         )
         for index, irate in enumerate(growth_rate):
             map_obj = Map(
-                function_for_mapping=self.function_to_map,
                 initial_value=0.1,
                 growth_rate=irate,
             )
+            map_obj.func = self.function_to_map
+            map_obj.number_of_terms = self.num_of_terms
             map_obj.solve(number_of_generations=n_generations)
             y_values = np.unique(
                 np.around(map_obj.x_values[-n_equilibrium:-1], decimals=3)
@@ -291,6 +301,45 @@ class Bifurcation:
                 self.r_equilibrium,
                 np.full_like(y_values, irate, dtype=np.double)
             )
+
+    def plots(
+            self,
+            *fig_info,
+            **fig_prop,
+    ) -> tuple:
+        """Plot the bifurcation diagram."""
+
+        try:
+            fig, ax = fig_info
+        except ValueError:
+            fig = plt.figure('Fig: Bifurcation diagram')
+            ax = fig.subplots()
+        if 'color' not in fig_prop.keys():
+            fig_prop['color'] = 'k'
+        if 'marker' not in fig_prop.keys():
+            fig_prop['marker'] = '.'
+        if 'fillstyle' not in fig_prop.keys():
+            fig_prop['fillstyle'] = 'full'
+        if 'xlabel' not in fig_prop.keys():
+            fig_prop['xlabel'] = 'Generations'
+        if 'ylabel' not in fig_prop.keys():
+            fig_prop['ylabel'] = 'Value'
+        if 'title' not in fig_prop.keys():
+            fig_prop['title'] = 'Progression of logistic map equation'
+        if 'grid' not in fig_prop.keys():
+            fig_prop['grid'] = True
+        ax.plot(
+            self.r_equilibrium,
+            self.y_equilibrium,
+            '.k',
+        )
+        ax.grid(fig_prop['grid'])
+        ax.set(xlabel=fig_prop['xlabel'])
+        ax.set(ylabel=fig_prop['ylabel'])
+        ax.set_ylim(0, 1)
+        ax.set(title=fig_prop['title'])
+
+        return fig, ax, fig_prop
 
 
 def _terms_(
