@@ -290,6 +290,8 @@ class Bifurcation:
                 number_of_generations=150
             )
 
+        self.plots()
+
     def get_equilibrium_values(
             self,
             number_of_generations: int = 300,
@@ -347,9 +349,9 @@ class Bifurcation:
         if 'fillstyle' not in fig_prop.keys():
             fig_prop['fillstyle'] = 'full'
         if 'xlabel' not in fig_prop.keys():
-            fig_prop['xlabel'] = 'Generations'
+            fig_prop['xlabel'] = 'Growth Rate'
         if 'ylabel' not in fig_prop.keys():
-            fig_prop['ylabel'] = 'Value'
+            fig_prop['ylabel'] = 'Equilibrium value'
         if 'title' not in fig_prop.keys():
             fig_prop['title'] = 'Progression of logistic map equation'
         if 'grid' not in fig_prop.keys():
