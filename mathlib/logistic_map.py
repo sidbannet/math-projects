@@ -20,6 +20,8 @@ class Marching:
             self,
             growth_rate: float = _DEFAULT_GROWTH_RATE,
             initial_value: float = _DEFAULT_INITIAL_VALUE,
+            number_of_terms: int = 1,
+            map_function: list = None,
     ):
         """Initialize the class."""
 
@@ -28,13 +30,28 @@ class Marching:
         assert (growth_rate > 0), "Growth rate is less than or equal to 0."
         self.growth_rate = growth_rate
         self.x_values = [initial_value]
-        self.number_of_terms = 1
+        self.number_of_terms = number_of_terms
         self.y = None
-        self.func = None
+        self.func = map_function
         self.fft = {
             'power': [],
             'freq': [],
         }
+
+    def __call__(self, *args, **kwargs) -> tuple:
+        """Call the class."""
+
+        try:
+            number_of_generations, fig, ax = args
+            fig_prop = kwargs
+        except ValueError:
+            number_of_generations = 100
+            fig = None
+            ax = None
+            fig_prop = {}
+        self.solve(number_of_generations=number_of_generations)
+        fig, ax, fig_prop = self.plots(fig, ax, fig_prop)
+        return fig, ax, fig_prop
 
     def _next_value_(
             self,
@@ -217,19 +234,21 @@ class Marching:
         return growth_rate * function(last_value)
 
 
-class Map(Marching):
-    """Marching with generations with a given mapping function."""
+class LogisticMap(Marching):
+    """Marching with generations for logistic map function."""
 
     def __init__(
-        self,
-        initial_value: float = _DEFAULT_INITIAL_VALUE,
-        growth_rate: float = _DEFAULT_GROWTH_RATE,
+            self,
+            initial_value: float = _DEFAULT_INITIAL_VALUE,
+            growth_rate: float = _DEFAULT_GROWTH_RATE,
     ):
         """Instantiate the class."""
 
         super().__init__(
             initial_value=initial_value,
             growth_rate=growth_rate,
+            map_function=_terms_(n=1),
+            number_of_terms=1,
         )
 
 
@@ -238,15 +257,20 @@ class Bifurcation:
 
     def __init__(
             self,
-            function_to_map: list = None,
-            number_of_terms: int = 1,
+            map_obj: Marching = None,
     ):
         """Instantiate the class."""
 
         self.y_equilibrium = np.empty([])
         self.r_equilibrium = np.empty([])
-        self.function_to_map = function_to_map
-        self.num_of_terms = number_of_terms
+        try:
+            self.map_obj = map_obj
+            self.function_to_map = map_obj.func
+            self.num_of_terms = map_obj.number_of_terms
+        except AttributeError:
+            self.map_obj = LogisticMap(initial_value=0.1, growth_rate=1.0)
+            self.function_to_map = self.map_obj.func
+            self.num_of_terms = self.map_obj.number_of_terms
 
     def __call__(self, *args, **kwargs):
         """The object is called like function."""
@@ -257,9 +281,14 @@ class Bifurcation:
                 number_of_generations_for_equilibrium += int(argv)
         else:
             number_of_generations_for_equilibrium = 150
-        self.get_equilibrium_values(
-            number_of_generations=number_of_generations_for_equilibrium
-        )
+        try:
+            self.get_equilibrium_values(
+                number_of_generations=number_of_generations_for_equilibrium,
+            )
+        except ValueError:
+            self.get_equilibrium_values(
+                number_of_generations=150
+            )
 
     def get_equilibrium_values(
             self,
@@ -274,22 +303,19 @@ class Bifurcation:
         n_generations = number_of_generations
         n_equilibrium = 64
 
-        demo_map_obj = Map(
-            growth_rate=1.0,
-        )
-        demo_map_obj.func = self.function_to_map
+        demo_map_obj = self.map_obj
         _, ax = demo_map_obj.plot_function()
         ax.set(title='Base function of the logistic map equation')
         growth_rate = np.linspace(
             start=0.1, stop=float(1.0 / demo_map_obj.y.max()), num=1000
         )
         for index, irate in enumerate(growth_rate):
-            map_obj = Map(
+            map_obj = Marching(
                 initial_value=0.1,
                 growth_rate=irate,
+                map_function=demo_map_obj.func,
+                number_of_terms=demo_map_obj.number_of_terms,
             )
-            map_obj.func = self.function_to_map
-            map_obj.number_of_terms = self.num_of_terms
             map_obj.solve(number_of_generations=n_generations)
             y_values = np.unique(
                 np.around(map_obj.x_values[-n_equilibrium:-1], decimals=3)
@@ -331,7 +357,8 @@ class Bifurcation:
         ax.plot(
             self.r_equilibrium,
             self.y_equilibrium,
-            '.k',
+            '.',
+            color=fig_prop['color'],
         )
         ax.grid(fig_prop['grid'])
         ax.set(xlabel=fig_prop['xlabel'])
