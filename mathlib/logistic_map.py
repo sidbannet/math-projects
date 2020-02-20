@@ -8,6 +8,7 @@ Classes for logistic map
 import sympy
 import numpy as np
 import matplotlib.pyplot as plt
+from collections.abc import Iterable
 
 _DEFAULT_GROWTH_RATE = float(3.4)
 _DEFAULT_INITIAL_VALUE = float(0.5)
@@ -62,12 +63,15 @@ class Marching:
 
         number_of_terms = self.number_of_terms
         assert (number_of_terms >= 0), "Number of terms can't be negative."
+        assert (number_of_terms is not None), "Number of terms is not defined."
         sum_of_terms = 0.0
         term_func = []
         if function is not None:
-            term_func.append(function)
+            if isinstance(function, Iterable):
+                term_func = function
+            else:
+                term_func.append(function)
         else:
-            term_func = []
             for i in range(number_of_terms + 1):
                 term_func.append(_terms_(n=i))
         for index, individual_term_function in enumerate(term_func):
@@ -249,7 +253,7 @@ class LogisticMap(Marching):
         super().__init__(
             initial_value=initial_value,
             growth_rate=growth_rate,
-            map_function=_terms_(n=1),
+            map_function=[_terms_(n=1)],
             number_of_terms=1,
         )
 
@@ -308,6 +312,8 @@ class Bifurcation:
         n_equilibrium = 64
 
         demo_map_obj = self.map_obj
+        demo_map_obj.growth_rate = 1.0
+        demo_map_obj.solve()
         _, ax = demo_map_obj.plot_function()
         ax.set(title='Base function of the logistic map equation')
         growth_rate = np.linspace(
