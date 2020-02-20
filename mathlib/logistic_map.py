@@ -63,8 +63,9 @@ class Marching:
         number_of_terms = self.number_of_terms
         assert (number_of_terms >= 0), "Number of terms can't be negative."
         sum_of_terms = 0.0
+        term_func = []
         if function is not None:
-            term_func = function
+            term_func.append(function)
         else:
             term_func = []
             for i in range(number_of_terms + 1):
