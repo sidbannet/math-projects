@@ -26,10 +26,10 @@ class Multibrot:
     """Multibrot fractals."""
 
     def __init__(
-            self,
-            n: int = 2,
-            alpha: float = 1.0,
-            max_iter: int = _MAX_ITER,
+        self,
+        n: int = 2,
+        alpha: float = 1.0,
+        max_iter: int = _MAX_ITER,
     ) -> None:
         """Constructor of the class."""
         assert (n >= 2), 'Value of n has to be greater or equal 2'
@@ -56,9 +56,9 @@ class Multibrot:
             raise Exception('Give integer value greater than 1')
 
     def potential(
-            self,
-            c: complex,
-            z0: complex = (0 + 0j),
+        self,
+        c: complex,
+        z0: complex = (0 + 0j),
     ) -> tuple:
         """Gives potential function"""
         z = z0
@@ -76,10 +76,10 @@ class Mandelbrot(Multibrot):
     """Mandelbrot fractal class."""
 
     def __init__(
-            self,
-            n: int = 2,
-            alpha: float = 1.0,
-            max_iter: int = _MAX_ITER,
+        self,
+        n: int = 2,
+        alpha: float = 1.0,
+        max_iter: int = _MAX_ITER,
     ) -> None:
         """Mandelbrot subclass."""
         super().__init__(
@@ -89,10 +89,10 @@ class Mandelbrot(Multibrot):
         )
 
     def image(
-            self,
-            width: int = _WIDTH,
-            height: int = _HEIGHT,
-            color: bool = False,
+        self,
+        width: int = _WIDTH,
+        height: int = _HEIGHT,
+        color: bool = False,
     ) -> Image:
         """Draw fractal image."""
         if color:
