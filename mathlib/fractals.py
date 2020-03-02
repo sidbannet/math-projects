@@ -34,7 +34,8 @@ class Multibrot:
         """Constructor of the class."""
         assert (n >= 2), 'Value of n has to be greater or equal 2'
         self.__n = n
-        self.func = lambda z, c: (z ** self.n + alpha * c)
+        self.__alpha = alpha
+        self.func = lambda z, c: (z ** self.n + self.alpha * c)
         self._Re_window = [_RE_START, _RE_END]
         self._Im_window = [_IM_START, _IM_END]
         self._max_iter = max_iter
@@ -54,6 +55,22 @@ class Multibrot:
         except TypeError as te:
             print(te)
             raise Exception('Give integer value greater than 1')
+
+    @property
+    def alpha(self) -> float:
+        """Getter of property n."""
+        return self.__alpha
+
+    @alpha.setter
+    def alpha(self, alpha) -> None:
+        """Setter of property alpha."""
+        try:
+            assert (alpha > 0.0), 'Value of alpha has to be greater or equal 0'
+            assert (type(alpha) is float), 'alpha is float'
+            self.__alpha = alpha
+        except TypeError as te:
+            print(te)
+            raise Exception('Give floating value greater than 0')
 
     def potential(
         self,
@@ -112,6 +129,86 @@ class Mandelbrot(Multibrot):
                 )
                 # Compute the number of iterations
                 m, _ = self.potential(c=c)
+                # The color depends on the number of iterations
+                # And plot the point
+                if color:
+                    hue = int(255 * m / self._max_iter)
+                    saturation = 255
+                    value = 255 if m < self._max_iter else 0
+                    draw.point([x, y], (hue, saturation, value))
+                elif not color:
+                    value = 255 - int(m * 255 / self._max_iter)
+                    draw.point([x, y], (value, value, value))
+
+        if color:
+            im = im.convert('RGB')
+        return im
+
+
+class JuliaSet(Multibrot):
+    """Julia set."""
+
+    def __init__(
+        self,
+        c: complex = None,
+        n: int = 2,
+        alpha: float = 1.0,
+        max_iter: int = _MAX_ITER,
+    ):
+        """Instantiate the subclass Julia Set."""
+        assert (c is not None), "Give a complex value to instance."
+        super().__init__(
+            n=n,
+            alpha=alpha,
+            max_iter=max_iter,
+        )
+        try:
+            self.__c__ = c
+        except ValueError as ve:
+            print(ve)
+            raise Exception('Complex value cannot be assigned.')
+
+    @property
+    def c(
+        self,
+    ) -> complex:
+        """Getter for the complex value."""
+        return self.__c__
+
+    @c.setter
+    def c(self, c: complex = None) -> None:
+        """Setter for the complex value."""
+        assert (type(c) is complex), 'Enter complex number.'
+        try:
+            self.__c__ = c
+        except ValueError as ve:
+            print(ve)
+            raise Exception('Cannot set the complex value.')
+
+    def image(
+        self,
+        width: int = _WIDTH,
+        height: int = _HEIGHT,
+        color: bool = False,
+    ) -> Image:
+        """Draw fractal image."""
+        if color:
+            im = Image.new('HSV', (width, height), (0, 0, 0))
+        elif not color:
+            im = Image.new('RGB', (width, height), (0, 0, 0))
+        draw = ImageDraw.Draw(im)
+
+        for x in range(0, width):
+            for y in range(0, height):
+                # Convert pixel coordinate to complex number
+                z0 = complex(
+                    self._Re_window[0]
+                    + (x / width) * (self._Re_window[1] - self._Re_window[0]),
+                    self._Im_window[0]
+                    + (y / height) * (self._Im_window[1] - self._Im_window[0])
+                )
+                # Compute the number of iterations
+                m, _ = self.potential(c=self.c, z0=z0)
                 # The color depends on the number of iterations
                 # And plot the point
                 if color:
