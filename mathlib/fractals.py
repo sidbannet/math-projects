@@ -26,10 +26,10 @@ class Multibrot:
     """Multibrot fractals."""
 
     def __init__(
-        self,
-        n: int = 2,
-        alpha: float = 1.0,
-        max_iter: int = _MAX_ITER,
+            self,
+            n: int = 2,
+            alpha: float = 1.0,
+            max_iter: int = _MAX_ITER,
     ) -> None:
         """Constructor of the class."""
         assert (n >= 1), 'Value of n has to be greater or equal 1'
@@ -73,8 +73,8 @@ class Multibrot:
             raise Exception('Give floating value greater than 0')
 
     def make_newton(
-        self,
-        p: sym.core = None,
+            self,
+            p: sym.core = None,
     ) -> None:
         """Make this a Newton Fractal."""
         try:
@@ -90,9 +90,9 @@ class Multibrot:
         self.func = lambda z, c: (z ** self.n + self.alpha * (f(z) + c))
 
     def potential(
-        self,
-        c: complex,
-        z0: complex = (0 + 0j),
+            self,
+            c: complex,
+            z0: complex = (0 + 0j),
     ) -> tuple:
         """Gives potential function"""
         z = z0
@@ -110,10 +110,10 @@ class Mandelbrot(Multibrot):
     """Mandelbrot fractal class."""
 
     def __init__(
-        self,
-        n: int = 2,
-        alpha: float = 1.0,
-        max_iter: int = _MAX_ITER,
+            self,
+            n: int = 2,
+            alpha: float = 1.0,
+            max_iter: int = _MAX_ITER,
     ) -> None:
         """Mandelbrot subclass."""
         super().__init__(
@@ -123,10 +123,10 @@ class Mandelbrot(Multibrot):
         )
 
     def image(
-        self,
-        width: int = _WIDTH,
-        height: int = _HEIGHT,
-        color: bool = False,
+            self,
+            width: int = _WIDTH,
+            height: int = _HEIGHT,
+            color: bool = False,
     ) -> Image:
         """Draw fractal image."""
         if color:
@@ -166,11 +166,11 @@ class JuliaSet(Multibrot):
     """Julia set."""
 
     def __init__(
-        self,
-        c: complex = None,
-        n: int = 2,
-        alpha: float = 1.0,
-        max_iter: int = _MAX_ITER,
+            self,
+            c: complex = None,
+            n: int = 2,
+            alpha: float = 1.0,
+            max_iter: int = _MAX_ITER,
     ):
         """Instantiate the subclass Julia Set."""
         assert (c is not None), "Give a complex value to instance."
@@ -187,7 +187,7 @@ class JuliaSet(Multibrot):
 
     @property
     def c(
-        self,
+            self,
     ) -> complex:
         """Getter for the complex value."""
         return self.__c__
@@ -203,10 +203,10 @@ class JuliaSet(Multibrot):
             raise Exception('Cannot set the complex value.')
 
     def image(
-        self,
-        width: int = _WIDTH,
-        height: int = _HEIGHT,
-        color: bool = False,
+            self,
+            width: int = _WIDTH,
+            height: int = _HEIGHT,
+            color: bool = False,
     ) -> Image:
         """Draw fractal image."""
         if color:
@@ -246,11 +246,11 @@ class NewtonFractal(JuliaSet):
     """Newton fractals."""
 
     def __init__(
-        self,
-        n: int = 1,
-        alpha: float = - 1.0,
-        p: sym.core = None,
-        max_iter: int = _MAX_ITER,
+            self,
+            n: int = 1,
+            alpha: float = - 1.0,
+            p: sym.core = None,
+            max_iter: int = _MAX_ITER,
     ):
         """Instantiate NewtonFractals."""
         super().__init__(n=n, alpha=alpha, max_iter=max_iter, c=0)
@@ -261,15 +261,25 @@ class NewtonFractal(JuliaSet):
         self,
     ) -> list:
         """Return solution root."""
-        roots = sym.solve(self.__p)
-        out = []
-        for iroot in roots:
-            out.append(
-                complex(sym.N(iroot))
-            )
+        out = roots(self.__p)
         return out
 
 
 def linear_interpolation(value1, value2, t):
     """Linear interpolation."""
     return value1 * (1 - t) + value2 * t
+
+
+def roots(f) -> list:
+    """Return roots."""
+    out = []
+    try:
+        sol = sym.solve(f)
+    except SyntaxError as se:
+        print(se)
+        raise Exception('Syntax error')
+    for individual_sol in sol:
+        out.append(
+            complex(sym.N(individual_sol))
+        )
+    return out
