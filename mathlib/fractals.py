@@ -77,16 +77,17 @@ class Multibrot:
         p: sym.core = None,
     ) -> None:
         """Make this a Newton Fractal."""
-        zsym = sym.Symbol('z')
         try:
-            p_prime = sym.diff(p, zsym)
-            assert (p_prime is not 0), "Newton Fractal not obtained."
-            f = self.alpha * p / p_prime
+            f = sym.utilities.lambdify(
+                sym.Symbol('z'), p / sym.diff(p)
+            )
         except NameError as ne:
             print(ne)
             raise Exception('Symbol name should be \'z\'')
-        f_l = sym.utilities.lambdify(zsym, f)
-        self.func = lambda z, c: (z ** self.n + self.alpha * (f_l(z) + c))
+        except ZeroDivisionError as ze:
+            print(ze)
+            raise Exception('Cannot divide by zero')
+        self.func = lambda z, c: (z ** self.n + self.alpha * (f(z) + c))
 
     def potential(
         self,
