@@ -6,9 +6,9 @@ Classes for fractals
 """
 
 import numpy as np
-from math import log, log2, floor, ceil
+from math import log, log2
+import sympy as sym
 from PIL import Image, ImageDraw
-from collections import defaultdict
 
 # GLOBAL CONSTANTS
 _MAX_ITER = 80  # Potential function cutoff
@@ -32,7 +32,7 @@ class Multibrot:
         max_iter: int = _MAX_ITER,
     ) -> None:
         """Constructor of the class."""
-        assert (n >= 2), 'Value of n has to be greater or equal 2'
+        assert (n >= 1), 'Value of n has to be greater or equal 1'
         self.__n = n
         self.__alpha = alpha
         self.func = lambda z, c: (z ** self.n + self.alpha * c)
@@ -71,6 +71,22 @@ class Multibrot:
         except TypeError as te:
             print(te)
             raise Exception('Give floating value greater than 0')
+
+    def make_newton(
+        self,
+        p: sym.core = None,
+    ) -> None:
+        """Make this a Newton Fractal."""
+        zsym = sym.Symbol('z')
+        try:
+            p_prime = sym.diff(p, zsym)
+            assert (p_prime is not 0), "Newton Fractal not obtained."
+            f = self.alpha * p / p_prime
+        except NameError as ne:
+            print(ne)
+            raise Exception('Symbol name should be \'z\'')
+        f_l = sym.utilities.lambdify(zsym, f)
+        self.func = lambda z, c: (z ** self.n + self.alpha * (f_l(z) + c))
 
     def potential(
         self,
@@ -223,6 +239,21 @@ class JuliaSet(Multibrot):
         if color:
             im = im.convert('RGB')
         return im
+
+
+class NewtonFractal(JuliaSet):
+    """Newton fractals."""
+
+    def __init__(
+        self,
+        n: int = 1,
+        alpha: float = - 1.0,
+        p: sym.core = None,
+        max_iter: int = _MAX_ITER,
+    ):
+        """Instantiate NewtonFractals."""
+        super().__init__(n=n, alpha=alpha, max_iter=max_iter, c=0)
+        self.make_newton(p=p)
 
 
 def linear_interpolation(value1, value2, t):
