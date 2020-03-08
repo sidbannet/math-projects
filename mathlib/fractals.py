@@ -254,7 +254,20 @@ class NewtonFractal(JuliaSet):
     ):
         """Instantiate NewtonFractals."""
         super().__init__(n=n, alpha=alpha, max_iter=max_iter, c=0)
+        self.__p = p
         self.make_newton(p=p)
+
+    def roots(
+        self,
+    ) -> list:
+        """Return solution root."""
+        roots = sym.solve(self.__p)
+        out = []
+        for iroot in roots:
+            out.append(
+                complex(sym.N(iroot))
+            )
+        return out
 
 
 def linear_interpolation(value1, value2, t):
