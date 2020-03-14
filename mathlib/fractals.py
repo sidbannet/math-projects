@@ -20,6 +20,7 @@ _RE_START = -2
 _RE_END = 1
 _IM_START = -1
 _IM_END = 1
+_TOLERANCE = 0.000001
 
 
 class Multibrot:
@@ -257,12 +258,57 @@ class NewtonFractal(JuliaSet):
         self.__p = p
         self.make_newton(p=p)
 
+    @property
     def roots(
         self,
     ) -> list:
         """Return solution root."""
         out = roots(self.__p)
         return out
+
+    def image(
+        self,
+        width: int = _WIDTH,
+        height: int = _HEIGHT,
+    ) -> Image:
+        """Draw fractal image."""
+        super(NewtonFractal, self).image(
+            width=width,
+            height=height,
+        )
+        if self.roots.__len__() is not 3:
+            return super().image(width=width, height=height, color=False)
+        im = Image.new('RGB', (width, height), (0, 0, 0))
+        draw = ImageDraw.Draw(im)
+        tolerance = _TOLERANCE
+
+        for x in range(0, width):
+            for y in range(0, height):
+                # Convert pixel coordinate to complex number
+                z0 = complex(
+                    self._Re_window[0]
+                    + (x / width) * (self._Re_window[1] - self._Re_window[0]),
+                    self._Im_window[0]
+                    + (y / height) * (self._Im_window[1] - self._Im_window[0])
+                )
+                # Compute the number of iterations
+                m, _ = self.potential(c=self.c, z0=z0)
+                # The color depends on the number of iterations
+                # And plot the point
+                value = 255 - int(m * 255 / self._max_iter)
+                z_next = self.func(z=z0, c=0)
+                red = int(0)
+                green = int(0)
+                blue = int(0)
+                if abs(z_next - self.roots[0]) < tolerance:
+                    red = int(1)
+                elif abs(z_next - self.roots[1]) < tolerance:
+                    green = int(1)
+                elif abs(z_next - self.roots[2]) < tolerance:
+                    blue = int(1)
+                draw.point([x, y], (value * red, value * green, value * blue))
+
+        return im
 
 
 def linear_interpolation(value1, value2, t):
