@@ -299,7 +299,10 @@ class NewtonFractal(JuliaSet):
                 # The color depends on the number of iterations
                 # And plot the point
                 value = 255 - int(m * 255 / self._max_iter)
-                z_next = self.func(z=z0, c=0)
+                try:
+                    z_next = self.func(z=z0, c=0)
+                except ZeroDivisionError as ze:
+                    z_next = 0
                 red = int(0)
                 green = int(0)
                 blue = int(0)
