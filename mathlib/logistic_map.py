@@ -203,6 +203,8 @@ class Marching:
             fig_prop['suptitle'] = 'Logistic Map'
         if 'grid' not in fig_prop.keys():
             fig_prop['grid'] = True
+        if 'label' not in fig_prop.keys():
+            fig_prop['label']: str = None
 
         ax[0].plot(
             self.x_values,
@@ -211,6 +213,7 @@ class Marching:
             linestyle=fig_prop['linestyle'],
             marker=fig_prop['marker'],
             fillstyle=fig_prop['fillstyle'],
+            label=fig_prop['label'],
         )
         ax[0].set(xlabel=fig_prop['xlabel'])
         ax[0].set(ylabel=fig_prop['ylabel'])
@@ -376,11 +379,14 @@ class Bifurcation:
             fig_prop['title'] = 'Progression of logistic map equation'
         if 'grid' not in fig_prop.keys():
             fig_prop['grid'] = True
+        if 'label' not in fig_prop.keys():
+            fig_prop['label']: str = None
         ax.plot(
             self.r_equilibrium,
             self.y_equilibrium,
             '.',
             color=fig_prop['color'],
+            label=fig_prop['label'],
         )
         ax.grid(fig_prop['grid'])
         ax.set(xlabel=fig_prop['xlabel'])
