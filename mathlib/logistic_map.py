@@ -42,16 +42,26 @@ class Marching:
     def __call__(self, *args, **kwargs) -> tuple:
         """Call the class."""
 
-        try:
-            number_of_generations, fig, ax = args
-            fig_prop = kwargs
-        except ValueError:
+        if len(args) > 0:
+            try:
+                number_of_generations, fig, ax = args
+            except ValueError:
+                number_of_generations = 100
+                fig = None
+                ax = None
+        else:
             number_of_generations = 100
             fig = None
             ax = None
-            fig_prop = {}
         self.solve(number_of_generations=number_of_generations)
-        fig, ax, fig_prop = self.plots(fig, ax, fig_prop)
+        if len(kwargs) == 0:
+            fig, ax, fig_prop = self.plots(fig, ax)
+        else:
+            fig_prop = kwargs
+            if fig is None:
+                fig, ax, fig_prop = self.plots(fig_prop)
+            else:
+                fig, ax, fig_prop = self.plots(fig, ax, fig_prop)
         return fig, ax, fig_prop
 
     def _next_value_(
