@@ -306,11 +306,15 @@ class NewtonFractal(JuliaSet):
                 red = int(0)
                 green = int(0)
                 blue = int(0)
-                if abs(z_next - self.roots[0]) < tolerance:
+                r = abs(z_next - self.roots[0])
+                g = abs(z_next - self.roots[1])
+                b = abs(z_next - self.roots[2])
+                minidx = min([r, g, b])
+                if abs(z_next - self.roots[0]) == minidx:
                     red = int(1)
-                elif abs(z_next - self.roots[1]) < tolerance:
+                elif abs(z_next - self.roots[1]) == minidx:
                     green = int(1)
-                elif abs(z_next - self.roots[2]) < tolerance:
+                elif abs(z_next - self.roots[2]) == minidx:
                     blue = int(1)
                 draw.point([x, y], (value * red, value * green, value * blue))
 
