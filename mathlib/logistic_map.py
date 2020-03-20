@@ -166,11 +166,17 @@ class Marching:
 
         """
 
-        try:
-            fig, ax = fig_info
-        except ValueError:
+        if len(fig_info) > 0:
+            try:
+                fig, ax, fig_prop = fig_info
+            except ValueError:
+                fig = plt.figure('Fig: Value marching with generations')
+                ax = fig.subplots(1, 2)
+        else:
             fig = plt.figure('Fig: Value marching with generations')
             ax = fig.subplots(1, 2)
+        if len(fig_prop) == 0:
+            fig_prop = {}
         if 'color' not in fig_prop.keys():
             fig_prop['color'] = 'k'
         if 'linewidth' not in fig_prop.keys():
@@ -345,11 +351,17 @@ class Bifurcation:
     ) -> tuple:
         """Plot the bifurcation diagram."""
 
-        try:
-            fig, ax = fig_info
-        except ValueError:
+        if len(fig_info) > 0:
+            try:
+                fig, ax = fig_info
+            except ValueError:
+                fig = plt.figure('Fig: Bifurcation diagram')
+                ax = fig.subplots()
+        else:
             fig = plt.figure('Fig: Bifurcation diagram')
             ax = fig.subplots()
+        if len(fig_prop) == 0:
+            fig_prop = {}
         if 'color' not in fig_prop.keys():
             fig_prop['color'] = 'k'
         if 'marker' not in fig_prop.keys():
