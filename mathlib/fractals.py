@@ -99,7 +99,10 @@ class Multibrot:
         z = z0
         n_p = 0
         while np.abs(z) < np.abs(self._Re_window[0]) and n_p < self._max_iter:
-            z = self.func(z=z, c=c)
+            try:
+                z = self.func(z=z, c=c)
+            except ZeroDivisionError as ze:
+                z = 0
             n_p += 1
         if n_p == self._max_iter:
             return n_p, n_p
