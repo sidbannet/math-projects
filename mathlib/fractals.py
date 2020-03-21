@@ -313,14 +313,14 @@ class NewtonFractal(JuliaSet):
                 r = abs(z_next - self.roots[0])
                 g = abs(z_next - self.roots[1])
                 b = abs(z_next - self.roots[2])
-                minidx = min([r, g, b])
                 if r < tolerance:
                     red = int(1)
-                elif g < tolerance:
+                if g < tolerance:
                     green = int(1)
-                elif b < tolerance:
+                if b < tolerance:
                     blue = int(1)
-                elif minidx > tolerance:
+                if value == 0:
+                    value = 255
                     red = 1
                     green = 1
                     blue = 1
