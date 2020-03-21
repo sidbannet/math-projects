@@ -287,7 +287,6 @@ class NewtonFractal(JuliaSet):
             return super().image(width=width, height=height, color=False)
         im = Image.new('RGB', (width, height), (0, 0, 0))
         draw = ImageDraw.Draw(im)
-        tolerance = _TOLERANCE
 
         for x in range(0, width):
             for y in range(0, height):
@@ -313,11 +312,12 @@ class NewtonFractal(JuliaSet):
                 r = abs(z_next - self.roots[0])
                 g = abs(z_next - self.roots[1])
                 b = abs(z_next - self.roots[2])
-                if r < tolerance:
+                minidx = min([r, g, b])
+                if r == minidx:
                     red = int(1)
-                if g < tolerance:
+                if g == minidx:
                     green = int(1)
-                if b < tolerance:
+                if b == minidx:
                     blue = int(1)
                 if value == 0:
                     value = 255
