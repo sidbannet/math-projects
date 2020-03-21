@@ -98,7 +98,11 @@ class Multibrot:
         """Gives potential function"""
         z = z0
         n_p = 0
-        while np.abs(z) < np.abs(self._Re_window[0]) and n_p < self._max_iter:
+        _window_range_ = np.abs(
+            (self._Re_window[1] - self._Re_window[0]) +
+            (self._Im_window[1] - self._Im_window[0]) * 1j
+        )
+        while np.abs(z) < _window_range_ and n_p < self._max_iter:
             try:
                 z = self.func(z=z, c=c)
             except ZeroDivisionError as ze:
@@ -295,7 +299,7 @@ class NewtonFractal(JuliaSet):
                     + (y / height) * (self._Im_window[1] - self._Im_window[0])
                 )
                 # Compute the number of iterations
-                m, _ = self.potential(c=self.c, z0=z0)
+                _, m = self.potential(c=self.c, z0=z0)
                 # The color depends on the number of iterations
                 # And plot the point
                 value = 255 - int(m * 255 / self._max_iter)
